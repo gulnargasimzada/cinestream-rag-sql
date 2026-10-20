@@ -79,3 +79,13 @@ Database network connectivity and schema integrity are verified through GitHub A
 - **Workflow File:** `.github/workflows/ci.yml`
 - **Secret Management:** Connection credentials are read strictly from `${{ secrets.DATABASE_URL }}`.
 - **Automated Test:** The workflow executes `pytest -v test_db.py`, connecting to the Supabase instance, running a live validation query (`SELECT COUNT(*) FROM movies;`), and confirming that test records are present.
+
+---
+
+## 5. Optional Extra Credit Implementations
+
+This platform implements the three optional extra-credit security and governance features:
+
+1. **SQL Injection Defense (Parameterized Logging):** Database audit logs are captured via parameterized queries (`cursor.execute(sql, (params))`) rather than string concatenation or vulnerable f-strings.
+2. **Execution Audit Trail:** A persistent `audit_logs` relation records every student query attempt, tracking `user_email`, `query_text`, `executed_at` timestamp, and execution status (`SUCCESS` or `FAILED`).
+3. **Immutability & Integrity Check:** A PostgreSQL database-level trigger (`trg_protect_audit_logs`) blocks all `UPDATE` and `DELETE` queries on `audit_logs`, preventing users from tampering with or clearing the audit trail.
