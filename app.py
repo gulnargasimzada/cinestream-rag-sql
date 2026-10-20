@@ -344,7 +344,7 @@ if run_button:
             )
 
 # Extra Credit Verification Table
-with st.expander("🛡️ View System Audit Logs (Extra Credit Feature)"):
+with st.expander("🛡️ View System Audit Logs"):
   logs_df, _ = execute_sql_query(
       "SELECT user_email, query_text, executed_at, status FROM audit_logs ORDER"
       " BY executed_at DESC LIMIT 10;"
