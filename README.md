@@ -58,11 +58,11 @@ Type a question in plain English into the **"Enter your business question"** inp
 ### Basic Requirement: Question & Generated SQL
 A natural language query converted into an executable PostgreSQL query via vector retrieval and Gemini:
 
-![Basic Screenshot](screenshots/basic_sql_generation.png)
+![Basic Screenshot](Screenshots/CineStream_1.png)
 
 ---
 
 ### Extra Credit: Executed SQL, Result Table & Audit Logging
 Live Supabase query execution, tabular record display, and audit log tracking in `query_audit_logs`:
 
-![Extra Credit Screenshot](screenshots/extra_credit_execution.png)
+![Extra Credit Screenshot](Screenshots/CineStream_2.png)
