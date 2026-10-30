@@ -121,7 +121,7 @@ if st.button("Generate SQL", type="primary"):
     else:
       st.error(retrieved_context)
 
-with st.expander("📜 View Live Database Audit Logs (Extra Credit)"):
+with st.expander("📜 View Live Database Audit Logs"):
   conn = get_db_connection()
   if conn:
     try:

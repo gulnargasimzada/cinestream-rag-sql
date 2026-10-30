@@ -1,91 +1,68 @@
-# SQL Assessment Platform
+# 🎬 CineStream: RAG-Powered Text-to-SQL Platform
 
-[![CI Database Test](https://github.com/gulnargasimzada/sql-quiz-app/actions/workflows/ci.yml/badge.svg)](https://github.com/gulnargasimzada/sql-quiz-app/actions/workflows/ci.yml)
-
-An interactive, cloud-native SQL evaluation environment where students can solve and execute relational queries against a live, hosted PostgreSQL database.
-
-- **Live Quiz Application URL:** https://sql-quiz-app-4gx6cjcl84jrrrsyans9ie.streamlit.app/
-- **Hosted Database:** PostgreSQL (Supabase) via Session Pooler (`sslmode=require`)
-- **Authentication Engine:** Supabase Auth
-- **Continuous Integration:** GitHub Actions with Encrypted Secrets
+## 🌐 Deployed Application
+* **Live Application URL:** https://gulnargasimzada-cinestream-rag-sql-app-wigxn5.streamlit.app
 
 ---
 
-## 1. System Architecture & Components
-
-The application fulfills all four core technical requirements:
-
-1. **Hosted PostgreSQL Database (Supabase):**
-   - Configured with a relational schema for a movie rental platform (`customers`, `movies`, `rentals`).
-   - Uses the **Session Pooler** over port `5432` with enforced `sslmode=require`.
-2. **Access Control & Authentication (Supabase Auth):**
-   - **Signed-Out State:** Visitors can inspect question prompts, but database query execution is strictly locked.
-   - **Signed-In State:** Authenticated users can execute SQL against live tables and view resulting records.
-3. **CI Pipeline via GitHub Secrets:**
-   - Automated through `.github/workflows/ci.yml`.
-   - Executes `test_db.py` to verify live database connectivity using encrypted repository secrets without committing passwords.
-4. **20-Point SQL Assessment:**
-   - 5 multi-tier relational SQL questions (4 points each).
-   - Validated against live result sets (matching row count, schema shape, ordering, and data values).
+## 📌 Project Overview
+This project transitions an interactive relational database testing tool into an autonomous **Retrieval-Augmented Generation (RAG)** Text-to-SQL platform. Users query a video streaming relational database containing `movies`, `customers`, and `rentals` schema using natural language. The system converts these questions into verified PostgreSQL queries, executes them live against a hosted cloud database, and tracks execution metrics.
 
 ---
 
-## 2. 20-Point SQL Quiz Specification
+## 🏗️ RAG Architecture & AI API Explanation
 
-| Question | Topic / Concept Tested | Points | Target Concept & Approach | Required Output Columns |
-| :---: | :--- | :---: | :--- | :--- |
-| **Q1** | Above-Average Rated Movies by Genre | 4 pts | Correlated subquery in `WHERE` comparing ratings to genre average | `title`, `genre`, `rating` |
-| **Q2** | Customers with No Sci-Fi Rentals | 4 pts | Subquery exclusion using `NOT IN` against target genre rentals | `full_name`, `country`, `subscription_type` |
-| **Q3** | Premium Revenue & Rental Count by Country | 4 pts | Multi-table `JOIN` with conditional aggregation and `HAVING` threshold | `country`, `premium_rentals_count`, `total_revenue` |
-| **Q4** | Customers Exceeding Mean Active Spending | 4 pts | Derived table (`FROM`-clause subquery) compared against overall spend | `full_name`, `total_spent` |
-| **Q5** | Top-Ranked Movie per Genre | 4 pts | Window function (`DENSE_RANK() OVER`) partitioned by genre | `genre`, `title`, `rental_rate` |
+The system bridges unstructured business inquiries and relational PostgreSQL querying through a four-stage pipeline:
 
----
-
-## 3. Step-by-Step User Guide (How to Use the Live Streamlit App)
-
-To take the assessment or grade a student's submission on the live platform:
-
-### Step 1: Open the Application
-Navigate to the live application URL provided at the top of this document.
-
-### Step 2: Sign Up and Sign In (Authentication Guardrail)
-1. In the left sidebar (**Student Portal**), select **Sign Up**.
-2. Enter an email and password, then click **Register**.
-3. Switch to **Sign In**, enter your credentials, and click **Log In**.
-4. Once authenticated, your email is confirmed in the sidebar (`👤 Logged In: ...`), unlocking query execution.
-
-### Step 3: Choose an Assessment Question
-1. Locate the **"Select Question:"** dropdown menu in the main panel.
-2. Select any of the 5 questions (Q1 through Q5). The question description, point value (4 pts), and requirements will update dynamically.
-
-### Step 4: Inspect Question Hints & Schema
-1. Click the **"💡 View Question Guidance & Expected Columns"** expander.
-2. Review the target output column names and structural approach for the question.
-
-### Step 5: Write and Execute Your SQL Query
-1. Write your SQL statement inside the **"Your Query Execution"** text box.
-2. Click the **🚀 Run Query** button.
-3. The platform executes your query against the live Supabase PostgreSQL database:
-   - **Live Results Table:** Displays all retrieved rows.
-   - **Automated Validation:** If your result matches the benchmark dataset (shape, values, ordering), a success message and balloon animation appear (`+4 Points`).
-   - If there is a mismatch, helpful feedback prompts you to adjust your conditions.
+1. **Semantic Schema Storage (ChromaDB):**
+   - An in-memory **ChromaDB** vector database stores domain descriptions, column definitions, data types, and join constraints across `movies`, `customers`, and `rentals`.
+2. **Context Retrieval:**
+   - When a user submits a natural language question, ChromaDB evaluates semantic embeddings and retrieves the most relevant schema documentation.
+3. **SQL Synthesis via AI API (Google Gemini):**
+   - The user query and retrieved context are supplied to the **Google Gemini API** (`gemini-2.5-flash` via the official `google-genai` SDK). A strict system prompt enforces standard PostgreSQL dialect rules without conversational filler or markdown code fences.
+4. **Automated Live Database Execution & Audit Logging:**
+   - The synthesized SQL is executed directly against the hosted **Supabase PostgreSQL** instance via SSL connection pooling (`psycopg2`), displaying tabular query outputs in the interface.
+   - Each transaction (user query, generated SQL, execution status `SUCCESS` or `FAILED`, error trace, and timestamp) is recorded inside the persistent `query_audit_logs` database table.
 
 ---
 
-## 4. Continuous Integration & Security Verification
+## 🖥️ Instructions for Running and Using the Application
 
-Database network connectivity and schema integrity are verified through GitHub Actions:
-- **Workflow File:** `.github/workflows/ci.yml`
-- **Secret Management:** Connection credentials are read strictly from `${{ secrets.DATABASE_URL }}`.
-- **Automated Test:** The workflow executes `pytest -v test_db.py`, connecting to the Supabase instance, running a live validation query (`SELECT COUNT(*) FROM movies;`), and confirming that test records are present.
+### 1. Launching the Interface
+Open the deployed cloud application link directly in any web browser, or launch the application locally via terminal:
+`streamlit run app.py`
+
+### 2. Asking a Business Question
+Type a question in plain English into the **"Enter your business question"** input field.
+
+**Example queries:**
+* "Show all movies"
+* "Find movies with a rental rate higher than 3.00"
+* "List customers with a Premium subscription"
+* "Show total rental revenue per customer"
+
+### 3. Generating and Inspecting the SQL
+* Click the primary **"Generate SQL"** button.
+* ChromaDB performs semantic vector retrieval against the schema knowledge base, and Gemini synthesizes the PostgreSQL query.
+* The synthesized query is displayed in the **"Generated PostgreSQL Query"** block.
+* *(Optional)* Click **"🔍 Inspect Retrieved ChromaDB Vector Context"** to inspect the schema documentation retrieved from the vector store.
+
+### 4. Reviewing Live Database Execution & Audit Logs
+* The platform automatically executes the SQL query against Supabase, displaying returned rows under **"Query Execution & Live Database Results"**.
+* Expand **"📜 View Database Execution Audit Logs"** at the bottom of the page to review live execution tracking from the `query_audit_logs` table.
 
 ---
 
-## 5. Security & Audit Logging Implementation
+## 📸 Verification Screenshots
 
-This platform implements the three optional extra-credit security and governance features:
+### Basic Requirement: Question & Generated SQL
+A natural language query converted into an executable PostgreSQL query via vector retrieval and Gemini:
 
-1. **SQL Injection Defense (Parameterized Logging):** Database audit logs are captured via parameterized queries (`cursor.execute(sql, (params))`) rather than string concatenation or vulnerable f-strings.
-2. **Execution Audit Trail:** A persistent `audit_logs` relation records every student query attempt, tracking `user_email`, `query_text`, `executed_at` timestamp, and execution status (`SUCCESS` or `FAILED`).
-3. **Immutability & Integrity Check:** A PostgreSQL database-level trigger (`trg_protect_audit_logs`) blocks all `UPDATE` and `DELETE` queries on `audit_logs`, preventing users from tampering with or clearing the audit trail.
+![Basic Screenshot](screenshots/basic_sql_generation.png)
+
+---
+
+### Extra Credit: Executed SQL, Result Table & Audit Logging
+Live Supabase query execution, tabular record display, and audit log tracking in `query_audit_logs`:
+
+![Extra Credit Screenshot](screenshots/extra_credit_execution.png)
