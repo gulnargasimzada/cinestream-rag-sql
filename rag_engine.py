@@ -125,7 +125,7 @@ def generate_sql_with_rag(user_question: str) -> tuple[str, str]:
   try:
     client = get_genai_client()
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-3.8-flash",
         contents=system_prompt,
     )
     raw_sql = response.text.strip()
